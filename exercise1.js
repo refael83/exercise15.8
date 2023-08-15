@@ -35,6 +35,8 @@ app.get('/users/:id',(req,res)=>{
 
 app.post('/users',(req,res)=>{
     let newUser=req.body;
+    const {v4: uuidv4}=require('uuid')
+    newUser.id=uuidv4()
     data.push(newUser)
    res.send(data);
 })
@@ -56,6 +58,8 @@ app.delete('/users/:id',(req,res)=>{
     }
     res.send(data)
 })
+
+
 app.listen(port,()=>{
     console.log(`Server is up and running on port:${port}`);
 })
