@@ -89,8 +89,8 @@ app.delete("/users/:id", (req, res) => {
 app.post("/exist", (req, res) => {
   let exist =users.findIndex((user)=>user.email===req.body.email);
   if(exist>=0){
-    let password=bcrypt.compareSync(element.password, req.body.password);
-    if (password || req.body.password === element.password)
+    let password=bcrypt.compareSync(users[exist].password, req.body.password);
+    if (password || req.body.password === users[exist].password)
         res.send("User is connected")
   }
     else{
