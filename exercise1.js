@@ -15,6 +15,14 @@ const users = [
     password: "345678",
   },
 ];
+
+const express = require("express");
+const bcrypt = require("bcrypt");
+const { v4: uuidv4 } = require("uuid");
+const app = express();
+const port = 3000;
+app.use(express.json());
+
 function checkEmail(newEmail) {
   users.forEach((user) => {
     if (user.email === newEmail) return 0;
@@ -32,14 +40,7 @@ function validateEmail(email) {
     return passw.test(password)
   }
  //function checkInput(){}
-  
 
-const express = require("express");
-const bcrypt = require("bcrypt");
-const { v4: uuidv4 } = require("uuid");
-const app = express();
-const port = 3000;
-app.use(express.json());
 app.get("/", (req, res) => {
   res.send(users);
 });
@@ -80,10 +81,8 @@ app.put("/users/:id", (req, res) => {
 
 app.delete("/users/:id", (req, res) => {
     let j=users.findIndex((user)=>user.id == req.params.id);
-    console.log(j)
     if(j>=0) users.splice(j, 1);
     j>=0?res.send(users):res.send("not exist");
-  
 });
 
 app.post("/exist", (req, res) => {
