@@ -28,7 +28,8 @@ function validateEmail(email) {
   }
 
   function checkPassword(password){
-    let regex=/^(?=.*[a-z])(?=.*[A-Z]).{8,20}$/;
+    let passw=/^(?=.*[a-z])(?=.*[A-Z]).{8,20}$/;
+    return passw.test(password)
   }
  //function checkInput(){}
   
@@ -58,7 +59,7 @@ app.post("/users", (req, res) => {
   bcrypt.hash(newPassword, 10, function (err, hash) {
     newUser.password = hash;
     newUser.id = uuidv4();
-    if (checkEmail(newUser.email)&&validateEmail(newUser.email)&&checkPassword) {
+    if (checkEmail(newUser.email)&&validateEmail(newUser.email) &&checkPassword(newPassword)){
       users.push(newUser);
       res.send(users);
     } else {
@@ -89,28 +90,12 @@ app.post("/exist", (req, res) => {
   let exist =users.findIndex((user)=>user.email===req.body.email);
   if(exist>=0){
     let password=bcrypt.compareSync(element.password, req.body.password);
-    if (password || req.body.password === element.password){
-        res.send("User is connected");
-    }
+    if (password || req.body.password === element.password)
+        res.send("User is connected")
+  }
     else{
         res.send(" wrong credentials");
     }
-  }
-
-//   users.forEach((element) => {
-//     if (element.email === req.body.email) {
-//       let password = bcrypt.compareSync(element.password, req.body.password);
-//       if (password || req.body.password === element.password) {
-//         exist = 1;
-//         res.send("User is connected");
-//       }
-//     }
-//     if (i == users.length - 1 && exist == 0) {
-//       res.send(" wrong credentials");
-//     }
-
-//     i++;
-//   });
 });
 
 app.listen(port, () => {
