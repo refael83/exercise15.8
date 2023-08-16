@@ -59,6 +59,17 @@ app.delete('/users/:id',(req,res)=>{
     res.send(data)
 })
 
+app.post('/exist',(req,res)=>{
+    let exist=0
+    data.forEach((element)=>{
+       if(element.email===req.body.email&&element.password===req.body.password){
+        res.send("User is connected");
+        exist=1
+       }
+    })
+    if(exist==0)res.send(' wrong credentials')
+})
+
 
 app.listen(port,()=>{
     console.log(`Server is up and running on port:${port}`);
