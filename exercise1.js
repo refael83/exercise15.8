@@ -27,12 +27,13 @@ const file = "data.json";
 jsonfile.writeFile(file, data, function (err) {
   if (err) console.log(err);
 });
-jsonfile.readFile(file, function (err, obj) {
+jsonfile.readFile(file, function (err, users) {
   if (err) console.error(err);
-  console.dir(obj);
+  console.dir(users);
 });
 
-function checkEmail(newEmail) {
+function checkEmail(newEmail,users) {
+  console.log(users)
   users.forEach((user) => {
     if (user.email === newEmail) return 0;
   });
@@ -52,8 +53,8 @@ function checkPassword(password) {
 
 app.get("/", (req, res) => {
   jsonfile.readFile(file, (err, users) => {
-  res.send(users);
-  })
+    res.send(users);
+  });
 });
 //stage 1
 app.get("/users/:id", (req, res) => {
@@ -66,54 +67,65 @@ app.get("/users/:id", (req, res) => {
 });
 
 app.post("/users", (req, res) => {
-  let users = jsonfile.readFile(file, function (err, obj) {
+ jsonfile.readFile(file, function (err, users) {
     if (err) console.error(err);
-    console.dir(obj);
-  });
-  let newUser = req.body;
-  let newPassword = newUser.password;
-  bcrypt.hash(newPassword, 10, function (err, hash) {
-    newUser.password = hash;
-    newUser.id = uuidv4();
-    if (
-      checkEmail(newUser.email) &&
-      validateEmail(newUser.email) &&
-      checkPassword(newPassword)
-    ) {
-      users.push(newUser);
-      jsonfile.writeFile(file,users, function(arr){
-         if (err) console.log(err);
-      });
-      res.send(users);
-    } else {
-      res.send("inter correct input");
-    }
+    let newUser = req.body;
+    let newPassword = newUser.password;
+    bcrypt.hash(newPassword, 10, function (err, hash) {
+      newUser.password = hash;
+      newUser.id = uuidv4();
+      if (
+        checkEmail(newUser.email,users) &&
+        validateEmail(newUser.email) &&
+        checkPassword(newPassword)
+      ) {
+        users.push(newUser);
+        jsonfile.writeFile(file, users, function (arr) {
+          if (err) console.log(err);
+        });
+        res.send(users);
+      } else {
+        res.send("inter correct input");
+      }
+    });
   });
 });
 
 app.put("/users/:id", (req, res) => {
-  let users = jsonfile.readFile(file, function (err, obj) {
+  jsonfile.readFile(file, function (err, users) {
     if (err) console.error(err);
+    let j = users.findIndex((user) => user.id === req.params.id);
+    if (j >= 0) {
+      users[j] = req.body;
+      jsonfile.writeFile(file, users, function (arr) {
+        if (err) console.log(err);
+      });
+      res.send(users);
+    } else {
+      res.send("not exist");
+    }
   });
-  let j = users.findIndex((user) => user.id === req.params.id);
-  if (j >= 0) {
-    users[j] = req.body;
-    jsonfile.writeFile(file,users, function(arr){
-      if (err) console.log(err);
-   });
-    res.send(users);
-  } else {
-    res.send("not exist");
-  }
 });
 
 app.delete("/users/:id", (req, res) => {
+  jsonfile.readFile(file, function (err, users) {
+    if (err) console.error(err);
   let j = users.findIndex((user) => user.id === req.params.id);
-  if (j >= 0) users.splice(j, 1);
-  j >= 0 ? res.send(users) : res.send("not exist");
+  if (j >= 0) {
+    users.splice(j, 1);
+    jsonfile.writeFile(file, users, function (arr) {
+      if (err) console.log(err);
+    });
+    res.send(users)
+  }else{
+    res.send("not exist");
+  }
+  })
 });
 
 app.post("/exist", (req, res) => {
+  let users = jsonfile.readFile(file, function (err, users) {
+    if (err) console.error(err);
   let exist = users.findIndex((user) => user.email === req.body.email);
   if (exist >= 0) {
     let password = bcrypt.compareSync(users[exist].password, req.body.password);
@@ -122,6 +134,7 @@ app.post("/exist", (req, res) => {
   } else {
     res.send(" wrong credentials");
   }
+})
 });
 
 app.listen(port, () => {
